@@ -3,5 +3,4 @@ tkcolorpicker==2.1.3
 PyPDF2==3.0.1
 pikepdf
 img2pdf>=0.5.1
-pyheif
 pillow-heif

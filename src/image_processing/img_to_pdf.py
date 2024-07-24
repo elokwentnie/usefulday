@@ -1,6 +1,5 @@
 from PIL import Image
 import img2pdf
-import PyPDF2
 import sys
 
 def img_to_pdf(input_path, output_path=None):

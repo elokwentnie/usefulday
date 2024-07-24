@@ -7,7 +7,7 @@ def read_requirements():
 
 setup(
     name='usefulday',
-    version='0.1.0',
+    version='0.2.0',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=read_requirements(),
@@ -16,8 +16,10 @@ setup(
             'webp_to_jpg=src.image_processing.webp_to_jpg:main',
             'webp_to_png=src.image_processing.webp_to_png:main',
             'img_to_pdf=src.image_processing.img_to_pdf:main',
-            'merge_pdf=src.image_processing.merge_pdf:main',
             'heic_to_jpg=src.image_processing.heic_to_jpg:main',
+            'merge_pdf=src.file_management.merge_pdf:main',
+            'doc_to_pdf=src.file_management.doc_to_pdf:main',
+            'pdf_to_doc=src.file_management.pdf_to_doc:main',
         ]
     }
 )

@@ -1,0 +1,2 @@
+Pillow==9.5.0
+tkcolorpicker==2.1.3

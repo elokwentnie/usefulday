@@ -165,3 +165,4 @@ myenv/
 build/
 dist/
 .spec
+myenv/

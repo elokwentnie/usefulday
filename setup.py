@@ -15,6 +15,7 @@ setup(
         'console_scripts': [
             'webp_to_jpg=src.image_processing.webp_to_jpg:main',
             'webp_to_png=src.image_processing.webp_to_png:main',
+            'img_to_pdf=src.image_processing.img_to_pdf:main',
         ]
     }
 )

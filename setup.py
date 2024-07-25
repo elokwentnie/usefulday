@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from setuptools import setup, find_packages
 
 # Function to read the requirements.txt file
@@ -17,6 +19,7 @@ setup(
             'webp_to_png=src.image_processing.webp_to_png:main',
             'img_to_pdf=src.image_processing.img_to_pdf:main',
             'heic_to_jpg=src.image_processing.heic_to_jpg:main',
+            'reduce_img_size=src.image_processing.reduce_img_size:main',
             'merge_pdf=src.file_management.merge_pdf:main',
             'doc_to_pdf=src.file_management.doc_to_pdf:main',
             'pdf_to_doc=src.file_management.pdf_to_doc:main',

@@ -7,3 +7,4 @@ img2pdf>=0.5.1
 pillow-heif
 pdf2docx
 docx2pdf
+rembg

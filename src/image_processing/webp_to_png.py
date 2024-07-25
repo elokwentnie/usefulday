@@ -5,7 +5,7 @@ def webp_to_png(input_path, output_path=None):
     if output_path==None:
         output_path=input_path.split(".")[0] + ".png"
     im = Image.open(input_path).convert("RGBA")
-    im.save(output_path, "png")
+    im.save(output_path, "png", quality=95)
 
 def main():
     if len(sys.argv) < 2:

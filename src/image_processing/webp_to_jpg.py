@@ -27,7 +27,7 @@ def webp_to_jpg(input_path, output_path=None):
         background.save(output_path, "jpeg")
     else:
         im = Image.open(input_path).convert("RGB")
-        im.save(output_path, "jpeg")
+        im.save(output_path, "jpeg", quality=95)
 
 def main():
     if len(sys.argv) < 2:

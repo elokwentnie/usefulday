@@ -20,6 +20,7 @@ setup(
             'img_to_pdf=src.image_processing.img_to_pdf:main',
             'heic_to_jpg=src.image_processing.heic_to_jpg:main',
             'reduce_img_size=src.image_processing.reduce_img_size:main',
+            'remove_background=src.image_processing.remove_background:main',
             'merge_pdf=src.file_management.merge_pdf:main',
             'doc_to_pdf=src.file_management.doc_to_pdf:main',
             'pdf_to_doc=src.file_management.pdf_to_doc:main',

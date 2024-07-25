@@ -166,3 +166,4 @@ build/
 dist/
 .spec
 myenv/
+.DS_Store

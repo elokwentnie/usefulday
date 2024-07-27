@@ -30,7 +30,7 @@ def range_limited_int_type(arg):
 def main():
     parser = argparse.ArgumentParser(description="Convert .jpg to .png")
     parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .jpg file path')
-    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .png file name')
+    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .png file path')
     parser.add_argument('-q', '--quality', type=range_limited_int_type, default=85, help='Quality: 0-100')
     
     args = parser.parse_args()

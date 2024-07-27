@@ -19,6 +19,7 @@ setup(
             'webp_to_png=src.image_processing.webp_to_png:main',
             'jpg_to_png=src.image_processing.jpg_to_png:main',
             'png_to_jpg=src.image_processing.png_to_jpg:main',
+            'tiff_to_jpg=src.image_processing.tiff_to_jpg:main',
             'img_to_pdf=src.image_processing.img_to_pdf:main',
             'heic_to_jpg=src.image_processing.heic_to_jpg:main',
             'reduce_img_size=src.image_processing.reduce_img_size:main',

@@ -1,6 +1,7 @@
 from PIL import Image
 import sys
-
+import argparse
+import os
 
 def has_transparency(img_path):
     with Image.open(img_path) as img:
@@ -12,31 +13,45 @@ def has_transparency(img_path):
                 return True
         return False
     
-def webp_to_jpg(input_path, output_path=None):
-    if output_path==None:
-            output_path=input_path.split(".")[0] + ".jpg"
-    if has_transparency(input_path):
-        if input("Background color: black or white: ").lower() == "white":
-            background_color=(255,255,255)
-        else:
-            background_color=(0,0,0)
-        im = Image.open(input_path).convert("RGBA")
-        background = Image.new("RGB", im.size, background_color)
-        background.paste(im, (0,0), im)
+def webp_to_jpg(input_file, output_file=None):
+    if output_file is None or not (output_file.lower().endswith('.jpg') or output_file.lower().endswith('.jpeg')):
+        base, _ = os.path.splitext(input_file)
+        output_file = f"{base}.jpg"
+    if has_transparency(input_file):
+        try:
+            if input("Background color: black or white: ").lower() == "white":
+                background_color=(255,255,255)
+            else:
+                background_color=(0,0,0)
 
-        background.save(output_path, "jpeg")
+            im = Image.open(input_file).convert("RGBA")
+
+            background = Image.new("RGB", im.size, background_color)
+            background.paste(im, (0,0), im)
+            background.save(output_file, "jpeg", quality=95)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
     else:
-        im = Image.open(input_path).convert("RGB")
-        im.save(output_path, "jpeg", quality=95)
-
+        try:
+            im = Image.open(input_file).convert("RGB")
+            im.save(output_file, "jpeg", quality=95)
+        except Exception as e:
+            print(f"Error: {e}")
+            sys.exit(1)
+            
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: webp_to_jpg <input_path> [output_path]")
-        print(f"Arguments received: {sys.argv}")
+    parser = argparse.ArgumentParser(description="Convert .webp to .jpg")
+    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .webp file path')
+    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .jpg file name')
+    
+    args = parser.parse_args()
+
+    if os.path.isfile(args.input_file) and args.input_file.lower().endswith('.webp'):
+        webp_to_jpg(args.input_file, args.output_file)
+    else:
+        print(f"Error: {args.input_file} does not exist or the extension is not .webp.")
         sys.exit(1)
-    input_path = sys.argv[1]
-    output_path = sys.argv[2] if len(sys.argv) > 2 else None
-    webp_to_jpg(input_path, output_path)
 
 if __name__ == '__main__':
     main()

@@ -29,6 +29,7 @@ def webp_to_jpg(input_file, output_file=None):
             background = Image.new("RGB", im.size, background_color)
             background.paste(im, (0,0), im)
             background.save(output_file, "jpeg", quality=95)
+            print(f"Conversion succesful: {output_file}")
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
@@ -36,10 +37,11 @@ def webp_to_jpg(input_file, output_file=None):
         try:
             im = Image.open(input_file).convert("RGB")
             im.save(output_file, "jpeg", quality=95)
+            print(f"Conversion succesful: {output_file}")
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
-            
+
 def main():
     parser = argparse.ArgumentParser(description="Convert .webp to .jpg")
     parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .webp file path')

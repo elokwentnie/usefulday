@@ -20,7 +20,7 @@ def heic_to_jpg(input_files, output_directory):
             file_name = file.split(".")[0] + ".jpg"
             output_file = os.path.join(output_directory, file_name)
             image.save(output_file, "jpeg", quality=95)
-            print(f"Converted {file} to {output_file}")
+            print(f"Conversion succesful: {output_file}")
         except Exception as e:
             print(f"Failed to convert {file}: {e}")
 

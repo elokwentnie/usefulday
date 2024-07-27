@@ -4,10 +4,15 @@ import argparse
 import os
 
 def pdf_to_docx(input_file, output_file):
-    if output_file==None or output_file.split(".")[-1]!="docx":
-        output_file=input_file.split(".")[0] + ".docx"
-    parse(input_file, output_file)
-    print(f"{input_file} converted successfully into {output_file}")
+    if output_file is None or not output_file.lower().endswith('.docx'):
+        base, _ = os.path.splitext(input_file)
+        output_file = f"{base}.docx"
+    try:
+        parse(input_file, output_file)
+        print(f"Conversion succesful: {output_file}")
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(description="Covert PDF into DOCX.")

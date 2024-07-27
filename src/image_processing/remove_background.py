@@ -23,6 +23,7 @@ def remove_background(input_files):
                     output_image = output_image.convert('RGB')
 
             output_image.save(output_file, quality=95)
+            print(f"Bacground removal succesful: {output_file}")
         except Exception as e:
             print(f"Failed to remove background of {file}: {e}")
 

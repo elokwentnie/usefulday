@@ -1,5 +1,5 @@
 # UsefulDay
-## Tips to Simplify, Speed Up, and Protect Your Computing Life (and Life in general)
+## Don't waste your time searching for web solutions, do it in your terminal.
 
 **UsefulDay** is a versatile command-line utility designed to streamline various image and document processing tasks. With **UsefulDay**, you can easily convert images between formats, manage PDF files, and more, all from the comfort of your command line and what more important **localy** - without sharing your files on any other server.
 

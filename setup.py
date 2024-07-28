@@ -27,6 +27,7 @@ setup(
             'merge_pdf=src.file_management.merge_pdf:main',
             'doc_to_pdf=src.file_management.doc_to_pdf:main',
             'pdf_to_doc=src.file_management.pdf_to_doc:main',
+            'split_pdf=src.file_management.split_pdf:main',
         ]
     }
 )

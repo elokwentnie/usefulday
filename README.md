@@ -4,9 +4,9 @@
 **UsefulDay** is a versatile command-line utility designed to streamline various image and document processing tasks. With **UsefulDay**, you can easily convert images between formats, manage PDF files, and more, all from the comfort of your command line and what more important **localy** - without sharing your files on any other server.
 
 ## Features
-* Image Conversion: Convert WebP images to JPG or PNG, and HEIC images to JPG.
-* PDF Management: Merge PDFs, convert DOC files to PDFs, and convert PDFs to DOC files.
-* Convenient CLI Tools: Utilize easy-to-use command-line tools for efficient processing.
+* Image Conversion
+* PDF Management
+* Convenient CLI Tools
 
 ## Installation
 To install UsefulDay, follow these steps:

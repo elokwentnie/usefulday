@@ -10,3 +10,4 @@ docx2pdf
 rembg
 pandas
 openpyxl
+pymupdf

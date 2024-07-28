@@ -29,6 +29,7 @@ setup(
             'pdf_to_doc=src.file_management.pdf_to_doc:main',
             'split_pdf=src.file_management.split_pdf:main',
             'csv_to_excel=src.file_management.csv_to_excel:main',
+            'excel_to_csv=src.file_management.excel_to_csv:main',
         ]
     }
 )

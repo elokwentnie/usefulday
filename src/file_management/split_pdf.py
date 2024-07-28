@@ -8,8 +8,6 @@ def split_pdf(input_file, parts):
 
     try:
         reader = PdfReader(input_file)
-        num_pages = len(reader.pages)
-        
         if not parts:
             for i, page in enumerate(reader.pages):
                 output_file = f"{base}-part_{i+1}.pdf"

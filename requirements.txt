@@ -11,3 +11,4 @@ rembg
 pandas
 openpyxl
 pymupdf
+pdf2image

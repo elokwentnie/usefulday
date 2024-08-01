@@ -27,7 +27,7 @@ def write_pages_to_png(pages, base, zip_object=False):
         page.save(output_file, "PNG")
         print(f"Succesfuly created: {output_file}.")
         if zip_object:
-            zip_object.write(output_file)
+            zip_object.write(output_file, arcname=f"{base}-part_{i+1}.png")
 
 def main():
     parser = argparse.ArgumentParser(description="Split pdf page by page into seperate png files (default), you can zip the output.")

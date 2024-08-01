@@ -33,6 +33,7 @@ setup(
             'csv_to_excel=src.file_management.csv_to_excel:main',
             'excel_to_csv=src.file_management.excel_to_csv:main',
             'csv_to_json=src.file_management.csv_to_json:main',
+            'add_watermark=src.file_management.add_watermark:main',
         ]
     }
 )

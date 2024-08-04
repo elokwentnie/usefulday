@@ -3,7 +3,7 @@ Pillow
 tkcolorpicker
 PyPDF2
 pikepdf
-img2pdf>=0.5.1
+img2pdf
 pillow-heif
 pdf2docx
 docx2pdf

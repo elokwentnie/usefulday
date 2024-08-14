@@ -1,37 +1,22 @@
+import exif
 from PIL import Image
-from PIL.ExifTags import TAGS
 import sys
 import argparse
 import os
-from pathlib import Path
 
 def change_img_metadata(input_file):
     try:    
-        image = Image.open(input_file).convert("RGB")
-        info_dict = {
-            "Image Name": Path(input_file).name,
-            "Image Size": image.size,
-            "Image Height": image.height,
-            "Image Width": image.width,
-            "Image Format": image.format,
-            "Image Mode": image.mode,
-            "Image is Animated": getattr(image, "is_animated", False),
-            "Frames in Image": getattr(image, "n_frames", 1)
-        }
-        for label, value in info_dict.items():
-            print(f"{label:25}: {value}")
-            if input(f"Do you want to update {label}? (y/n): ").lower() == 'y':
-                label = input(f"New {label} values: ")
+        img = exif.Image(input_file)
+        exifdata = img.get_all()
+        
+        for tag in exifdata:
+            print(f"{tag} : {img.get(tag)}")
+            print(img.tag)
 
-        exifdata = image.getexif()
-        for tag_id in exifdata:
-            tag = TAGS.get(tag_id, tag_id)
-            data = exifdata.get(tag_id)
-            if isinstance(data, bytes):
-                data = data.decode()
-            print(f"{tag:25}: {data}")
-            if input(f"Do you want to update {tag}? (y/n): ").lower() == 'y':
-                label = input(f"New {tag} value: ")
+        # Save the image with the new EXIF data
+        base, _ = os.path.splitext(input_file)
+        output_file = f"{base}-changed.jpg"
+        # img.save(output_file, exif=img.info.get('exif'))
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)

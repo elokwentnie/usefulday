@@ -12,3 +12,4 @@ pandas
 openpyxl
 pymupdf
 pdf2image
+exif

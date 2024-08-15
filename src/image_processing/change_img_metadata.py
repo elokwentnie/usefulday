@@ -4,6 +4,14 @@ import sys
 import argparse
 import os
 
+def update_exif_data(img, tag, new_value):
+    """Update EXIF data in the image."""
+    if hasattr(img, tag):
+        print(f"Updating {tag} to {new_value}")
+        setattr(img, tag, new_value)
+    else:
+        print(f"Tag {tag} not found in EXIF data")
+
 def change_img_metadata(input_file):
     try:    
         img = exif.Image(input_file)
@@ -11,7 +19,6 @@ def change_img_metadata(input_file):
         
         for tag in exifdata:
             print(f"{tag} : {img.get(tag)}")
-            print(img.tag)
 
         # Save the image with the new EXIF data
         base, _ = os.path.splitext(input_file)

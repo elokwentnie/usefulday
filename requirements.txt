@@ -1,3 +1,5 @@
+audio-extract
+opencv-python
 setuptools
 Pillow
 tkcolorpicker

@@ -39,6 +39,8 @@ setup(
             'excel_to_csv=src.file_management.excel_to_csv:main',
             'csv_to_json=src.file_management.csv_to_json:main',
             'json_to_csv=src.file_management.json_to_csv:main',
+
+            'extract_audio_from_video=src.video_audio_manipulation.extract_audio_from_video:main',
         ]
     }
 )

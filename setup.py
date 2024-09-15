@@ -28,8 +28,8 @@ setup(
             'extract_img_metadata=src.image_processing.extract_img_metadata:main',
             'extract_text_from_img=src.image_processing.extract_text_from_img:main',
 
-
             'merge_pdf=src.file_management.merge_pdf:main',
+            'add_watermark=src.file_management.add_watermark:main',
             'doc_to_pdf=src.file_management.doc_to_pdf:main',
             'pdf_to_doc=src.file_management.pdf_to_doc:main',
             'split_pdf=src.file_management.split_pdf:main',

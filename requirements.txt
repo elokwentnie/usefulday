@@ -13,3 +13,4 @@ openpyxl
 pymupdf
 pdf2image
 pytesseract
+PyPDF2

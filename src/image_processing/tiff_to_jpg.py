@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 
-def tiff_to_jpg(input_file: Path, output_file: Path = None, quality: int = 85) -> None:
+def tiff_to_jpg(input_file: Path, output_file: Path = None, quality: int = 95) -> None:
     if output_file is None or output_file.suffix.lower() not in ['.jpg', '.jpeg']:
         output_file = input_file.with_suffix('.jpg')
     try:
@@ -34,7 +34,7 @@ def main():
     parser = argparse.ArgumentParser(description="Convert .tiff to .jpg")
     parser.add_argument('input_file', type=Path, help='Input .tiff file path')
     parser.add_argument('-o', '--output_file', type=Path, default=None, help='Output .jpg file path')
-    parser.add_argument('-q', '--quality', type=validate_quality, default=85, help='Quality (0-100), default is 85.')
+    parser.add_argument('-q', '--quality', type=validate_quality, default=95, help='Quality (0-100), default is 95.')
 
     args = parser.parse_args()
     input_file = args.input_file

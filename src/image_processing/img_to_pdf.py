@@ -1,43 +1,46 @@
-from PIL import Image
-import img2pdf
 import sys
-import os
 import argparse
+from pathlib import Path
+from PIL import Image, UnidentifiedImageError
+import img2pdf
 
-def img_to_pdf(input_file, output_file=None):
+def img_to_pdf(input_file: Path, output_file: Path = None) -> None:
     if output_file is None:
-        base, _ = os.path.splitext(input_file)
-        output_file = f"{base}.pdf"
+        output_file = input_file.with_suffix('.pdf')
     try:
-        with Image.open(input_file) as image:
-            pdf = img2pdf.convert(image.filename)
-            with open(output_file, "wb") as file:
-                file.write(pdf)
-                print(f"Conversion succesful: {output_file}")
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+        # Ensure the image can be opened
+        with Image.open(input_file) as img:
+            pass  # Image successfully opened
 
-def is_image(file_path):
-    try:
-        with Image.open(file_path) as img:
-            return True
-    except (IOError, Image.UnidentifiedImageError) as e:
-        print(f"Error: {e}")
-        return False
+        # Convert the image to PDF
+        with open(output_file, "wb") as f:
+            f.write(img2pdf.convert(str(input_file)))
+        print(f"Conversion successful: {output_file}")
+    except FileNotFoundError:
+        print(f"Error: File '{input_file}' not found.")
+        sys.exit(1)
+    except UnidentifiedImageError:
+        print(f"Error: Cannot identify image file '{input_file}'.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        sys.exit(1)
 
 def main():
-    parser = argparse.ArgumentParser(description="Convert image file to .pdf")
-    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input: image file path')
-    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .pdf file name')
-    
+    parser = argparse.ArgumentParser(description="Convert an image file to PDF.")
+    parser.add_argument('input_file', type=Path, help='Path to the input image file')
+    parser.add_argument('-o', '--output_file', type=Path, default=None, help='Path for the output PDF file')
     args = parser.parse_args()
 
-    if os.path.isfile(args.input_file) and is_image(args.input_file):
-        img_to_pdf(args.input_file, args.output_file)
-    else:
-        print(f"Error: {args.input_file} does not exist or is not an image.")
+    input_file = args.input_file
+    output_file = args.output_file
+
+    # Validate the input file
+    if not input_file.is_file():
+        print(f"Error: '{input_file}' does not exist or is not a file.")
         sys.exit(1)
+
+    img_to_pdf(input_file, output_file)
 
 if __name__ == '__main__':
     main()

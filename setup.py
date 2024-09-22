@@ -8,8 +8,8 @@ def read_requirements():
         return req_file.readlines()
 
 setup(
-    name='usefulday',
-    version='0.2.0',
+    name='LocalMorph',
+    version='1.0.0',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=read_requirements(),

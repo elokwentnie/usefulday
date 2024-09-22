@@ -1,46 +1,56 @@
-from pdf2image import convert_from_path
-from zipfile import ZipFile 
 import sys
 import argparse
-import os
+from pathlib import Path
+from pdf2image import convert_from_path
+from zipfile import ZipFile
 
-def pdf_to_png(input_file, zip=False):
-    base, _ = os.path.splitext(input_file)
+def pdf_to_png(input_file: Path, zip_output: bool = False) -> None:
+    base_name = input_file.stem
+    output_dir = input_file.parent
 
     try:
-        pages = convert_from_path(input_file)
-        if not zip:
-            write_pages_to_png(pages, base)
-            print("Successfully split the PDF into png files.")
-        else:
-            output_zip = f"{base}-png-packed.tar"
-            with ZipFile(output_zip, 'w') as zip_object:
-                write_pages_to_png(pages, base, zip_object)
-            print(f"Successfully split the PDF into png files and zipped into {output_zip}.")
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+        # Convert PDF to a list of images
+        pages = convert_from_path(str(input_file))
 
-def write_pages_to_png(pages, base, zip_object=False):
-     for i, page in enumerate(pages):
-        output_file = f"{base}-part_{i+1}.png"
-        page.save(output_file, "PNG")
-        print(f"Succesfuly created: {output_file}.")
-        if zip_object:
-            zip_object.write(output_file, arcname=f"{base}-part_{i+1}.png")
+        image_files = []
+        for i, page in enumerate(pages, start=1):
+            output_file = output_dir / f"{base_name}_page_{i}.png"
+            page.save(output_file, "PNG")
+            image_files.append(output_file)
+            print(f"Successfully created: {output_file}")
+
+        if zip_output:
+            zip_filename = output_dir / f"{base_name}_images.zip"
+            with ZipFile(zip_filename, 'w') as zipf:
+                for image_file in image_files:
+                    zipf.write(image_file, arcname=image_file.name)
+            print(f"Successfully zipped images into: {zip_filename}")
+        else:
+            print("Successfully converted PDF pages to PNG images.")
+    except Exception as e:
+        print(f"Error processing {input_file}: {e}")
+        sys.exit(1)
 
 def main():
-    parser = argparse.ArgumentParser(description="Split pdf page by page into seperate png files (default), you can zip the output.")
-    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .PDF file path')
-    parser.add_argument('-z', '--zip', action='store_true', help='Use if you want to zip the output.')
-    
+    parser = argparse.ArgumentParser(
+        description="Convert PDF pages to individual PNG images, with an option to zip the output."
+    )
+    parser.add_argument('input_file', type=Path, help='Path to the input PDF file')
+    parser.add_argument(
+        '-z', '--zip', action='store_true', help='Zip the output PNG files into a single archive.'
+    )
+
     args = parser.parse_args()
 
-    if not os.path.isfile(args.input_file) or not args.input_file.lower().endswith('.pdf'):
-        print(f"Error: {args.input_file} does not exist or it is not PDF file.")
+    input_file = args.input_file
+    zip_output = args.zip
+
+    # Validate the input file
+    if not input_file.is_file() or input_file.suffix.lower() != '.pdf':
+        print(f"Error: '{input_file}' does not exist or is not a PDF file.")
         sys.exit(1)
 
-    pdf_to_png(args.input_file, args.zip)
+    pdf_to_png(input_file, zip_output)
 
 if __name__ == '__main__':
     main()

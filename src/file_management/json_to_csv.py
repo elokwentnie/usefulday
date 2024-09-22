@@ -1,35 +1,45 @@
 import pandas as pd
-import json
 import sys
 import argparse
-import os
+from pathlib import Path
+import json
 
-def json_to_csv(input_file, output_file):
-    if output_file is None or not output_file.lower().endswith('.csv'):
-        base, _ = os.path.splitext(input_file)
-        output_file = f"{base}.csv"
+def json_to_csv(input_file: Path, output_file: Path = None) -> None:
+    if output_file is None or output_file.suffix.lower() != '.csv':
+        output_file = input_file.with_suffix('.csv')
     try:
-        with open(input_file) as data_file:    
-            data = json.load(data_file) 
-        df_json = pd.json_normalize(data)
-        df_json.to_csv(output_file)
-        print(f"Conversion succesful: {output_file}")
+        with open(input_file, 'r', encoding='utf-8') as data_file:
+            data = json.load(data_file)
+        # Normalize JSON data into a flat table
+        df = pd.json_normalize(data)
+        # Write DataFrame to CSV without the index
+        df.to_csv(output_file, index=False)
+        print(f"Conversion successful: {output_file}")
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON from {input_file}: {e}")
+        sys.exit(1)
+    except FileNotFoundError:
+        print(f"Error: The file {input_file} was not found.")
+        sys.exit(1)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
 def main():
-    parser = argparse.ArgumentParser(description="Convert XLSX (Excel) into CSV file.")
-    parser.add_argument('input_file', metavar='input_files', type=str, default=None, help='Input .json file paths')
-    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .csv file name')
+    parser = argparse.ArgumentParser(description="Convert a JSON file to a CSV file.")
+    parser.add_argument('input_file', type=Path, help='Path to the input .json file')
+    parser.add_argument('-o', '--output_file', type=Path, default=None, help='Path for the output .csv file')
     
     args = parser.parse_args()
+    input_file = args.input_file
+    output_file = args.output_file
 
-    if os.path.isfile(args.input_file) and args.input_file.lower().endswith('.json'):
-        json_to_csv(args.input_file, args.output_file)
-    else:
-        print(f"Error: {args.input_file} does not exist.")
+    # Validate the input file
+    if not input_file.is_file() or input_file.suffix.lower() != '.json':
+        print(f"Error: {input_file} does not exist or is not a JSON file.")
         sys.exit(1)
+
+    json_to_csv(input_file, output_file)
 
 if __name__ == '__main__':
     main()

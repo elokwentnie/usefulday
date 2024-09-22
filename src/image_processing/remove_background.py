@@ -1,17 +1,17 @@
-import rembg
-import numpy as np
-import os
-import argparse
-from PIL import Image
 import sys
-import glob
-    
+import argparse
+from pathlib import Path
+import numpy as np
+from PIL import Image, UnidentifiedImageError
+import rembg
+
 def remove_background(input_files):
     for file in input_files:
         try:
             image = Image.open(file)
-            file_ext = os.path.splitext(file)[1]
-            output_file = os.path.splitext(file)[0] + "-background-removed" + file_ext
+            file_ext = file.suffix.lower()
+            output_file = file.with_stem(f"{file.stem}-background-removed")
+
             input_array = np.array(image)
             output_array = rembg.remove(input_array)
             output_image = Image.fromarray(output_array)
@@ -23,35 +23,43 @@ def remove_background(input_files):
                     output_image = output_image.convert('RGB')
 
             output_image.save(output_file, quality=95)
-            print(f"Bacground removal succesful: {output_file}")
+            print(f"Background removal successful: {output_file}")
+        except UnidentifiedImageError:
+            print(f"Error: Cannot identify image file '{file}'. Skipping.")
         except Exception as e:
-            print(f"Failed to remove background of {file}: {e}")
+            print(f"Failed to remove background of '{file}': {e}")
 
 def main():
     parser = argparse.ArgumentParser(description="Remove background from photos.")
-    parser.add_argument('-f', '--input_files', metavar='input_files', type=str, nargs='+', default=None, help='Input file path(s)')
-    parser.add_argument('-d', '--input_directory', type=str, default=None, help='Input directory with photos inside')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-f', '--input_files', type=Path, nargs='+', help='Input file path(s)')
+    group.add_argument('-d', '--input_directory', type=Path, help='Input directory with photos inside')
 
     args = parser.parse_args()
-    
-    if args.input_files != None:
-        for path in args.input_files:
-            if not os.path.isfile(path):
-                print(f"Error: {path} does not exist.")
-                sys.exit(1)
-        remove_background(args.input_files)
-    elif args.input_directory != None:
-        input_files = []
-        for file_path in glob.glob(os.path.join(args.input_directory, '*')):
-            if os.path.isfile(file_path) and (file_path.lower().endswith('.jpg') or file_path.lower().endswith('.png')):
-                input_files.append(file_path)
-        if not input_files:
-            print(f"No .jpg / .png files found in directory {args.input_directory}")
+
+    if args.input_files:
+        input_files = args.input_files
+    elif args.input_directory:
+        input_directory = args.input_directory
+        if not input_directory.is_dir():
+            print(f"Error: '{input_directory}' is not a valid directory.")
             sys.exit(1)
-        remove_background(input_files)
+        input_files = list(input_directory.glob('*'))
+        input_files = [file for file in input_files if file.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+        if not input_files:
+            print(f"No .jpg or .png files found in directory '{input_directory}'")
+            sys.exit(1)
     else:
         print("Error: Either --input_files or --input_directory must be provided.")
         sys.exit(1)
+
+    # Validate input files
+    for file in input_files:
+        if not file.is_file():
+            print(f"Error: '{file}' does not exist or is not a file.")
+            sys.exit(1)
+
+    remove_background(input_files)
 
 if __name__ == '__main__':
     main()

@@ -4,9 +4,10 @@ from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 import img2pdf
 
+
 def img_to_pdf(input_file: Path, output_file: Path = None) -> None:
     if output_file is None:
-        output_file = input_file.with_suffix('.pdf')
+        output_file = input_file.with_suffix(".pdf")
     try:
         # Ensure the image can be opened
         with Image.open(input_file) as img:
@@ -26,10 +27,17 @@ def img_to_pdf(input_file: Path, output_file: Path = None) -> None:
         print(f"Unexpected error: {e}")
         sys.exit(1)
 
+
 def main():
     parser = argparse.ArgumentParser(description="Convert an image file to PDF.")
-    parser.add_argument('input_file', type=Path, help='Path to the input image file')
-    parser.add_argument('-o', '--output_file', type=Path, default=None, help='Path for the output PDF file')
+    parser.add_argument("input_file", type=Path, help="Path to the input image file")
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        type=Path,
+        default=None,
+        help="Path for the output PDF file",
+    )
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -42,5 +50,6 @@ def main():
 
     img_to_pdf(input_file, output_file)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

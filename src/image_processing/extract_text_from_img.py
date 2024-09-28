@@ -4,6 +4,7 @@ from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 import pytesseract
 
+
 def extract_text_from_img(input_file: Path, save_flag: bool = False) -> None:
     try:
         # Open the image file
@@ -12,14 +13,14 @@ def extract_text_from_img(input_file: Path, save_flag: bool = False) -> None:
             img = img.convert("RGB")
             # Extract text from image using pytesseract
             extracted_text = pytesseract.image_to_string(img)
-        
+
         # Print the extracted text
         print(extracted_text)
 
         # Save the extracted text to a file if requested
         if save_flag:
             output_file = input_file.with_name(f"{input_file.stem}_extracted-text.txt")
-            with open(output_file, 'w', encoding='utf-8') as file:
+            with open(output_file, "w", encoding="utf-8") as file:
                 file.write(extracted_text)
             print(f"Successfully saved extracted text to: {output_file}")
     except FileNotFoundError:
@@ -32,11 +33,19 @@ def extract_text_from_img(input_file: Path, save_flag: bool = False) -> None:
         print(f"Unexpected error: {e}")
         sys.exit(1)
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Extract text from an image using OCR.")
-    parser.add_argument('input_file', type=Path, help='Path to the input image file')
-    parser.add_argument('-s', '--save', action='store_true', help='Save the extracted text to a .txt file')
-    
+    parser = argparse.ArgumentParser(
+        description="Extract text from an image using OCR."
+    )
+    parser.add_argument("input_file", type=Path, help="Path to the input image file")
+    parser.add_argument(
+        "-s",
+        "--save",
+        action="store_true",
+        help="Save the extracted text to a .txt file",
+    )
+
     args = parser.parse_args()
     input_file = args.input_file
 
@@ -47,5 +56,6 @@ def main():
 
     extract_text_from_img(input_file, args.save)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

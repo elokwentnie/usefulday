@@ -17,7 +17,7 @@ def pdf_to_jpg(input_file: Path, zip_output: bool = False) -> None:
 
         if zip_output:
             zip_filename = output_dir / f"{base_name}_images.zip"
-            with ZipFile(zip_filename, 'w') as zipf:
+            with ZipFile(zip_filename, "w") as zipf:
                 for i, page in enumerate(pages, start=1):
                     # Save image to in-memory bytes buffer
                     img_buffer = BytesIO()
@@ -43,13 +43,17 @@ def pdf_to_jpg(input_file: Path, zip_output: bool = False) -> None:
         print(f"Error processing {input_file}: {e}")
         sys.exit(1)
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert PDF pages to individual JPG images, with an option to zip the output."
     )
-    parser.add_argument('input_file', type=Path, help='Path to the input PDF file')
+    parser.add_argument("input_file", type=Path, help="Path to the input PDF file")
     parser.add_argument(
-        '-z', '--zip', action='store_true', help='Zip the output JPG files into a single archive.'
+        "-z",
+        "--zip",
+        action="store_true",
+        help="Zip the output JPG files into a single archive.",
     )
 
     args = parser.parse_args()
@@ -58,11 +62,12 @@ def main():
     zip_output = args.zip
 
     # Validate the input file
-    if not input_file.is_file() or input_file.suffix.lower() != '.pdf':
+    if not input_file.is_file() or input_file.suffix.lower() != ".pdf":
         print(f"Error: '{input_file}' does not exist or is not a PDF file.")
         sys.exit(1)
 
     pdf_to_jpg(input_file, zip_output)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

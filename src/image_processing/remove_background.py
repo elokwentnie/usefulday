@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image, UnidentifiedImageError
 import rembg
 
+
 def remove_background(input_files):
     for file in input_files:
         try:
@@ -16,11 +17,11 @@ def remove_background(input_files):
             output_array = rembg.remove(input_array)
             output_image = Image.fromarray(output_array)
 
-            if output_image.mode == 'RGBA':
+            if output_image.mode == "RGBA":
                 # Remove alpha channel for JPEG or keep it for PNG
-                if file_ext in ['.jpg', '.jpeg']:
+                if file_ext in [".jpg", ".jpeg"]:
                     # Convert RGBA to RGB
-                    output_image = output_image.convert('RGB')
+                    output_image = output_image.convert("RGB")
 
             output_image.save(output_file, quality=95)
             print(f"Background removal successful: {output_file}")
@@ -29,11 +30,16 @@ def remove_background(input_files):
         except Exception as e:
             print(f"Failed to remove background of '{file}': {e}")
 
+
 def main():
     parser = argparse.ArgumentParser(description="Remove background from photos.")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-f', '--input_files', type=Path, nargs='+', help='Input file path(s)')
-    group.add_argument('-d', '--input_directory', type=Path, help='Input directory with photos inside')
+    group.add_argument(
+        "-f", "--input_files", type=Path, nargs="+", help="Input file path(s)"
+    )
+    group.add_argument(
+        "-d", "--input_directory", type=Path, help="Input directory with photos inside"
+    )
 
     args = parser.parse_args()
 
@@ -44,8 +50,12 @@ def main():
         if not input_directory.is_dir():
             print(f"Error: '{input_directory}' is not a valid directory.")
             sys.exit(1)
-        input_files = list(input_directory.glob('*'))
-        input_files = [file for file in input_files if file.suffix.lower() in ['.jpg', '.jpeg', '.png']]
+        input_files = list(input_directory.glob("*"))
+        input_files = [
+            file
+            for file in input_files
+            if file.suffix.lower() in [".jpg", ".jpeg", ".png"]
+        ]
         if not input_files:
             print(f"No .jpg or .png files found in directory '{input_directory}'")
             sys.exit(1)
@@ -61,5 +71,6 @@ def main():
 
     remove_background(input_files)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

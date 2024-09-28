@@ -3,10 +3,11 @@ import sys
 import argparse
 from pathlib import Path
 
+
 def doc_to_pdf(input_file: Path, output_file: Path = None) -> None:
     # Determine the output file path
-    if output_file is None or output_file.suffix.lower() != '.pdf':
-        output_file = input_file.with_suffix('.pdf')
+    if output_file is None or output_file.suffix.lower() != ".pdf":
+        output_file = input_file.with_suffix(".pdf")
     try:
         # Convert the DOC/DOCX file to PDF
         convert(str(input_file), str(output_file))
@@ -15,10 +16,19 @@ def doc_to_pdf(input_file: Path, output_file: Path = None) -> None:
         print(f"Error converting {input_file} to PDF: {e}")
         sys.exit(1)
 
+
 def main():
     parser = argparse.ArgumentParser(description="Convert DOCX/DOC files to PDF.")
-    parser.add_argument('input_file', type=Path, help='Path to the input .docx or .doc file')
-    parser.add_argument('-o', '--output_file', type=Path, default=None, help='Path for the output .pdf file')
+    parser.add_argument(
+        "input_file", type=Path, help="Path to the input .docx or .doc file"
+    )
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        type=Path,
+        default=None,
+        help="Path for the output .pdf file",
+    )
 
     args = parser.parse_args()
 
@@ -26,11 +36,12 @@ def main():
     output_file = args.output_file
 
     # Validate the input file
-    if not input_file.is_file() or input_file.suffix.lower() not in ['.docx', '.doc']:
+    if not input_file.is_file() or input_file.suffix.lower() not in [".docx", ".doc"]:
         print(f"Error: {input_file} does not exist or is not a DOCX/DOC file.")
         sys.exit(1)
 
     doc_to_pdf(input_file, output_file)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

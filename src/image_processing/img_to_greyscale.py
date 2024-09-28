@@ -3,7 +3,10 @@ import argparse
 from pathlib import Path
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-def img_to_greyscale(input_file: Path, output_file: Path = None, quality: int = 85) -> None:
+
+def img_to_greyscale(
+    input_file: Path, output_file: Path = None, quality: int = 85
+) -> None:
     if output_file is None:
         output_file = input_file.with_stem(f"{input_file.stem}-greyscale")
     try:
@@ -18,6 +21,7 @@ def img_to_greyscale(input_file: Path, output_file: Path = None, quality: int = 
         print(f"Error processing '{input_file}': {e}")
         sys.exit(1)
 
+
 def validate_quality(value: str) -> int:
     try:
         quality = int(value)
@@ -25,13 +29,28 @@ def validate_quality(value: str) -> int:
             raise ValueError
         return quality
     except ValueError:
-        raise argparse.ArgumentTypeError("Quality must be an integer between 0 and 100.")
+        raise argparse.ArgumentTypeError(
+            "Quality must be an integer between 0 and 100."
+        )
+
 
 def main():
     parser = argparse.ArgumentParser(description="Convert an image file to grayscale.")
-    parser.add_argument('input_file', type=Path, help='Path to the input image file')
-    parser.add_argument('-o', '--output_file', type=Path, default=None, help='Path for the output image file')
-    parser.add_argument('-q', '--quality', type=validate_quality, default=85, help='Output image quality (0-100)')
+    parser.add_argument("input_file", type=Path, help="Path to the input image file")
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        type=Path,
+        default=None,
+        help="Path for the output image file",
+    )
+    parser.add_argument(
+        "-q",
+        "--quality",
+        type=validate_quality,
+        default=85,
+        help="Output image quality (0-100)",
+    )
 
     args = parser.parse_args()
 
@@ -41,5 +60,6 @@ def main():
 
     img_to_greyscale(args.input_file, args.output_file, args.quality)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

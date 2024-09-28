@@ -4,17 +4,32 @@ from pathlib import Path
 from moviepy.editor import VideoFileClip
 import mimetypes
 
-def extract_audio_from_video(input_file: Path, audio_format: str = "mp3", output_file: Path = None) -> None:
-    audio_extensions = ["mp3", "wav", "aac", "ogg", "flac", "m4a",
-                        "wma", "alac", "aiff", "opus"]
+
+def extract_audio_from_video(
+    input_file: Path, audio_format: str = "mp3", output_file: Path = None
+) -> None:
+    audio_extensions = [
+        "mp3",
+        "wav",
+        "aac",
+        "ogg",
+        "flac",
+        "m4a",
+        "wma",
+        "alac",
+        "aiff",
+        "opus",
+    ]
     if audio_format not in audio_extensions:
         print(f"Error: Unsupported audio format '{audio_format}'.")
         sys.exit(1)
 
     if output_file is None:
-        output_file = input_file.with_name(f"{input_file.stem}-extracted.{audio_format}")
+        output_file = input_file.with_name(
+            f"{input_file.stem}-extracted.{audio_format}"
+        )
     else:
-        if output_file.suffix.strip('.').lower() not in audio_extensions:
+        if output_file.suffix.strip(".").lower() not in audio_extensions:
             output_file = output_file.with_suffix(f".{audio_format}")
 
     try:
@@ -24,21 +39,32 @@ def extract_audio_from_video(input_file: Path, audio_format: str = "mp3", output
             print(f"Error: No audio stream found in '{input_file}'.")
             sys.exit(1)
         audio.write_audiofile(str(output_file))
-        print(f"Audio has been successfully extracted from '{input_file}' and saved as '{output_file}'")
+        print(
+            f"Audio has been successfully extracted from '{input_file}' and saved as '{output_file}'"
+        )
     except Exception as e:
         print(f"Error during audio extraction: {e}")
         sys.exit(1)
 
+
 def is_video(file_path: Path) -> bool:
     mime_type, _ = mimetypes.guess_type(file_path)
-    return mime_type is not None and mime_type.startswith('video')
+    return mime_type is not None and mime_type.startswith("video")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Extract audio from a video file.")
-    parser.add_argument('input_file', type=Path, help='Input video file path')
-    parser.add_argument('-o', '--output_file', type=Path, default=None, help="Output audio file name")
-    parser.add_argument('-f', '--format', type=str, default='mp3',
-                        help='Output audio format (e.g., mp3, wav, aac)')
+    parser.add_argument("input_file", type=Path, help="Input video file path")
+    parser.add_argument(
+        "-o", "--output_file", type=Path, default=None, help="Output audio file name"
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        type=str,
+        default="mp3",
+        help="Output audio format (e.g., mp3, wav, aac)",
+    )
     args = parser.parse_args()
 
     input_file = args.input_file
@@ -55,5 +81,6 @@ def main():
 
     extract_audio_from_video(input_file, audio_format, output_file)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

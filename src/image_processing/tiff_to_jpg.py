@@ -3,9 +3,10 @@ import argparse
 from pathlib import Path
 from PIL import Image, UnidentifiedImageError
 
+
 def tiff_to_jpg(input_file: Path, output_file: Path = None, quality: int = 95) -> None:
-    if output_file is None or output_file.suffix.lower() not in ['.jpg', '.jpeg']:
-        output_file = input_file.with_suffix('.jpg')
+    if output_file is None or output_file.suffix.lower() not in [".jpg", ".jpeg"]:
+        output_file = input_file.with_suffix(".jpg")
     try:
         with Image.open(input_file) as img:
             img = img.convert("RGB")
@@ -21,6 +22,7 @@ def tiff_to_jpg(input_file: Path, output_file: Path = None, quality: int = 95) -
         print(f"Unexpected error: {e}")
         sys.exit(1)
 
+
 def validate_quality(value: str) -> int:
     try:
         quality = int(value)
@@ -28,13 +30,24 @@ def validate_quality(value: str) -> int:
             raise argparse.ArgumentTypeError("Quality must be between 0 and 100.")
         return quality
     except ValueError:
-        raise argparse.ArgumentTypeError("Quality must be an integer between 0 and 100.")
+        raise argparse.ArgumentTypeError(
+            "Quality must be an integer between 0 and 100."
+        )
+
 
 def main():
     parser = argparse.ArgumentParser(description="Convert .tiff to .jpg")
-    parser.add_argument('input_file', type=Path, help='Input .tiff file path')
-    parser.add_argument('-o', '--output_file', type=Path, default=None, help='Output .jpg file path')
-    parser.add_argument('-q', '--quality', type=validate_quality, default=95, help='Quality (0-100), default is 95.')
+    parser.add_argument("input_file", type=Path, help="Input .tiff file path")
+    parser.add_argument(
+        "-o", "--output_file", type=Path, default=None, help="Output .jpg file path"
+    )
+    parser.add_argument(
+        "-q",
+        "--quality",
+        type=validate_quality,
+        default=95,
+        help="Quality (0-100), default is 95.",
+    )
 
     args = parser.parse_args()
     input_file = args.input_file
@@ -45,11 +58,12 @@ def main():
     if not input_file.is_file():
         print(f"Error: '{input_file}' does not exist or is not a file.")
         sys.exit(1)
-    if input_file.suffix.lower() not in ['.tif', '.tiff']:
+    if input_file.suffix.lower() not in [".tif", ".tiff"]:
         print(f"Error: Input file '{input_file}' is not a .tiff or .tif file.")
         sys.exit(1)
 
     tiff_to_jpg(input_file, output_file, quality)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

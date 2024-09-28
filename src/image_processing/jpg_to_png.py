@@ -1,45 +1,69 @@
-from PIL import Image
 import sys
 import argparse
-import os
+from pathlib import Path
+from PIL import Image, UnidentifiedImageError
 
-def jpg_to_png(input_file, output_file=None, quality=85):
-    if output_file is None or not output_file.lower().endswith('.png'):
-        base, _ = os.path.splitext(input_file)
-        output_file = f"{base}.png"
-    try:    
-        im = Image.open(input_file).convert("RGB")
-        im.save(output_file, "png", quality=quality)
-        print(f"Conversion succesful: {output_file}")
+
+def jpg_to_png(input_file: Path, output_file: Path = None, quality: int = 95) -> None:
+    if output_file is None or output_file.suffix.lower() != ".png":
+        output_file = input_file.with_suffix(".png")
+    try:
+        with Image.open(input_file) as im:
+            im = im.convert("RGB")
+            im.save(output_file, format="PNG", quality=quality)
+        print(f"Conversion successful: {output_file}")
+    except FileNotFoundError:
+        print(f"Error: File '{input_file}' not found.")
+        sys.exit(1)
+    except UnidentifiedImageError:
+        print(f"Error: Cannot identify image file '{input_file}'.")
+        sys.exit(1)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
-def range_limited_int_type(arg):
-    """ Type function for argparse - an int within some predefined bounds """
+
+def validate_quality(value: str) -> int:
     try:
-        i = int(arg)
+        i = int(value)
     except ValueError:
-        raise argparse.ArgumentTypeError("Must be a number")
-
-    if i < 0 or i > 100:
-        raise argparse.ArgumentTypeError("Argument must be between 0 and 100")
-
+        raise argparse.ArgumentTypeError("Quality must be a number.")
+    if not 0 <= i <= 100:
+        raise argparse.ArgumentTypeError("Quality must be between 0 and 100.")
     return i
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Convert .jpg to .png")
-    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .jpg file path')
-    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .png file path')
-    parser.add_argument('-q', '--quality', type=range_limited_int_type, default=85, help='Quality: 0-100')
-    
+    parser = argparse.ArgumentParser(
+        description="Convert a .jpg or .jpeg image to .png format."
+    )
+    parser.add_argument("input_file", type=Path, help="Input .jpg or .jpeg file path")
+    parser.add_argument(
+        "-o", "--output_file", type=Path, default=None, help="Output .png file path"
+    )
+    parser.add_argument(
+        "-q",
+        "--quality",
+        type=validate_quality,
+        default=95,
+        help="Quality (0-100), default is 95",
+    )
     args = parser.parse_args()
 
-    if os.path.isfile(args.input_file) and (args.input_file.lower().endswith('.jpg') or args.input_file.lower().endswith('.jpeg')):
-        jpg_to_png(args.input_file, args.output_file)
-    else:
-        print(f"Error: {args.input_file} does not exist or the extension is not .jpg/.jpeg.")
+    input_file = args.input_file
+    output_file = args.output_file
+    quality = args.quality
+
+    # Validate input file
+    if not input_file.is_file():
+        print(f"Error: '{input_file}' does not exist or is not a file.")
+        sys.exit(1)
+    if input_file.suffix.lower() not in [".jpg", ".jpeg"]:
+        print(f"Error: Input file '{input_file}' is not a .jpg or .jpeg file.")
         sys.exit(1)
 
-if __name__ == '__main__':
+    jpg_to_png(input_file, output_file, quality)
+
+
+if __name__ == "__main__":
     main()

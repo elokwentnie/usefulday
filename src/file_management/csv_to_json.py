@@ -1,33 +1,55 @@
 import pandas as pd
 import sys
 import argparse
-import os
+from pathlib import Path
 
-def csv_to_json(input_file, output_file):
-    if output_file is None or not output_file.lower().endswith('.json'):
-        base, _ = os.path.splitext(input_file)
-        output_file = f"{base}.json"
+
+def csv_to_json(input_file: Path, output_file: Path = None) -> None:
+    # Determine the output file path
+    if output_file is None or output_file.suffix.lower() != ".json":
+        output_file = input_file.with_suffix(".json")
     try:
-        df = pd.read_csv(input_file, sep=None, engine='python')
-        df.rename(columns={col:col.strip() for col in df.columns}, inplace=True)
-        df.to_json(output_file, indent=4, orient='records', lines=True)
-        print(f"Conversion succesful: {output_file}")
-    except Exception as e:
+        # Read the CSV file, allowing pandas to infer the separator
+        df = pd.read_csv(input_file, sep=None, engine="python")
+        # Strip whitespace from column names
+        df.rename(columns=lambda x: x.strip(), inplace=True)
+        # Write to JSON
+        df.to_json(output_file, indent=4, orient="records")
+        print(f"Conversion successful: {output_file}")
+    except pd.errors.ParserError as e:
+        print(f"Error parsing CSV file {input_file}: {e}")
+        sys.exit(1)
+    except FileNotFoundError as e:
         print(f"Error: {e}")
         sys.exit(1)
-
-def main():
-    parser = argparse.ArgumentParser(description="Convert CSV into JSON file.")
-    parser.add_argument('input_file', metavar='input_files', type=str, default=None, help='Input .csv file paths')
-    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .json file name')
-    
-    args = parser.parse_args()
-
-    if os.path.isfile(args.input_file) and args.input_file.lower().endswith('.csv'):
-        csv_to_json(args.input_file, args.output_file)
-    else:
-        print(f"Error: {args.input_file} does not exist.")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
-if __name__ == '__main__':
+
+def main():
+    parser = argparse.ArgumentParser(description="Convert a CSV file to a JSON file.")
+    parser.add_argument("input_file", type=Path, help="Path to the input .csv file")
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        type=Path,
+        default=None,
+        help="Path for the output .json file",
+    )
+
+    args = parser.parse_args()
+
+    input_file = args.input_file
+    output_file = args.output_file
+
+    # Validate the input file
+    if not input_file.is_file() or input_file.suffix.lower() != ".csv":
+        print(f"Error: {input_file} does not exist or is not a CSV file.")
+        sys.exit(1)
+
+    csv_to_json(input_file, output_file)
+
+
+if __name__ == "__main__":
     main()

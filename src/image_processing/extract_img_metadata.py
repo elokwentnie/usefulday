@@ -1,56 +1,85 @@
-from PIL import Image
-from PIL.ExifTags import TAGS
 import sys
 import argparse
-import os
 from pathlib import Path
+from PIL import Image
+from PIL.ExifTags import TAGS
 
-def extract_img_metadata(input_file):
-    try:    
-        image = Image.open(input_file).convert("RGB")
-        info_dict = {
-            "Image Name": Path(input_file).name,
-            "Image Size": image.size,
-            "Image Height": image.height,
-            "Image Width": image.width,
-            "Image Format": image.format,
-            "Image Mode": image.mode,
-            "Image is Animated": getattr(image, "is_animated", False),
-            "Frames in Image": getattr(image, "n_frames", 1)
-        }
-        for label, value in info_dict.items():
-            print(f"{label:25}: {value}")
 
-        exifdata = image.getexif()
-        for tag_id in exifdata:
-            tag = TAGS.get(tag_id, tag_id)
-            data = exifdata.get(tag_id)
-            if isinstance(data, bytes):
-                data = data.decode()
-            print(f"{tag:25}: {data}")
+def extract_img_metadata(input_file: Path, save_flag: bool = False) -> None:
+    try:
+        with Image.open(input_file) as img:
+            # Basic image information
+            info_dict = {
+                "Image Name": input_file.name,
+                "Image Size": img.size,
+                "Image Height": img.height,
+                "Image Width": img.width,
+                "Image Format": img.format,
+                "Image Mode": img.mode,
+                "Is Animated": getattr(img, "is_animated", False),
+                "Frames in Image": getattr(img, "n_frames", 1),
+            }
+
+            metadata_lines = [
+                f"{label:25}: {value}" for label, value in info_dict.items()
+            ]
+
+            # EXIF data
+            exifdata = img.getexif()
+            if exifdata:
+                metadata_lines.append("\nEXIF Data:")
+                for tag_id, data in exifdata.items():
+                    tag = TAGS.get(tag_id, tag_id)
+                    if isinstance(data, bytes):
+                        try:
+                            data = data.decode()
+                        except UnicodeDecodeError:
+                            data = data.decode("latin1", "ignore")
+                    metadata_lines.append(f"{tag:25}: {data}")
+            else:
+                metadata_lines.append("No EXIF data found.")
+
+            for line in metadata_lines:
+                print(line)
+
+            if save_flag:
+                output_file = input_file.with_name(f"{input_file.stem}_metadata.txt")
+                with open(output_file, "w", encoding="utf-8") as file:
+                    for line in metadata_lines:
+                        file.write(f"{line}\n")
+                    print(f"Successfully saved extracted text to: {output_file}")
+
+    except FileNotFoundError:
+        print(f"Error: File '{input_file}' not found.")
+        sys.exit(1)
+    except Image.UnidentifiedImageError:
+        print(f"Error: Cannot identify image file '{input_file}'.")
+        sys.exit(1)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
-def is_image(file_path):
-    try:
-        with Image.open(file_path) as img:
-            return True
-    except (IOError, Image.UnidentifiedImageError) as e:
-        print(f"Error: {e}")
-        return False
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract metadata from an .jpg image")
-    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input image (jpg) file path')
-    
+    parser = argparse.ArgumentParser(description="Extract metadata from an image file.")
+    parser.add_argument("input_file", type=Path, help="Path to the input image file")
+    parser.add_argument(
+        "-s",
+        "--save",
+        action="store_true",
+        help="Save the extracted text to a .txt file",
+    )
     args = parser.parse_args()
 
-    if os.path.isfile(args.input_file) and is_image(args.input_file) and (args.input_file.lower().endswith('.jpg') or args.input_file.lower().endswith('.jpeg')):
-        extract_img_metadata(args.input_file)
-    else:
-        print(f"Error: {args.input_file} does not exist or the file is not an .jpg image.")
+    input_file = args.input_file
+
+    # Validate the input file
+    if not input_file.is_file():
+        print(f"Error: '{input_file}' does not exist or is not a file.")
         sys.exit(1)
 
-if __name__ == '__main__':
+    extract_img_metadata(input_file, args.save)
+
+
+if __name__ == "__main__":
     main()

@@ -1,81 +1,117 @@
-from PyPDF2 import PdfReader, PdfWriter
 import sys
 import argparse
-import os
+from pathlib import Path
+from typing import List, Optional
+from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2.errors import PdfReadError
 
-def split_pdf(input_file, parts):
-    base, _ = os.path.splitext(input_file)
+
+def split_pdf(input_file: Path, parts: Optional[List[List[int]]] = None) -> None:
+    base_name = input_file.stem
+    output_dir = input_file.parent
 
     try:
-        reader = PdfReader(input_file)
+        reader = PdfReader(str(input_file))
         if not parts:
-            for i, page in enumerate(reader.pages):
-                output_file = f"{base}-part_{i+1}.pdf"
+            # Split into individual pages
+            for i, page in enumerate(reader.pages, start=1):
+                output_file = output_dir / f"{base_name}_page_{i}.pdf"
                 write_pages_to_pdf([page], output_file)
         else:
-            for i, part in enumerate(parts):
-                output_file = f"{base}-part_{i+1}.pdf"
+            # Split into specified parts
+            for i, part in enumerate(parts, start=1):
+                output_file = output_dir / f"{base_name}_part_{i}.pdf"
                 pages_to_write = [reader.pages[page_num] for page_num in part]
                 write_pages_to_pdf(pages_to_write, output_file)
-        
         print("Successfully split the PDF into parts.")
 
+    except PdfReadError as e:
+        print(f"Error reading PDF file '{input_file}': {e}")
+        sys.exit(1)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
-def write_pages_to_pdf(pages, output_file):
+
+def write_pages_to_pdf(pages: List, output_file: Path) -> None:
     writer = PdfWriter()
     for page in pages:
         writer.add_page(page)
-    with open(output_file, "wb") as file:
-        writer.write(file)
-    print(f"Succesfuly created: {output_file}.")
+    try:
+        with open(output_file, "wb") as file:
+            writer.write(file)
+        print(f"Successfully created: {output_file}")
+    except Exception as e:
+        print(f"Error writing to file '{output_file}': {e}")
+        sys.exit(1)
 
-def parse_parts_argument(arg):
-    """ Parse and validate parts argument """
+
+def parse_parts_argument(arg: str) -> int:
+    """Parse and validate the parts argument."""
     try:
         num_parts = int(arg)
         if num_parts < 1:
-            raise argparse.ArgumentTypeError("Argument must be bigger than 1")
+            raise argparse.ArgumentTypeError("Number of parts must be greater than 0.")
         return num_parts
     except ValueError:
-        raise argparse.ArgumentTypeError("Must be an integer")
+        raise argparse.ArgumentTypeError("Number of parts must be an integer.")
 
-def get_splitting_parts(pdf_length, num_parts):
-    """ Calculate page ranges for splitting the PDF """
-    n, remainder = divmod(pdf_length, num_parts)
-        
-    return [
-        list(range(start, start + n + (1 if i < remainder else 0)))
-        for i, start in enumerate(range(0, pdf_length, n+1))
-    ]
+
+def get_splitting_parts(pdf_length: int, num_parts: int) -> List[List[int]]:
+    """Calculate page ranges for splitting the PDF."""
+    pages_per_part = pdf_length // num_parts
+    remainder = pdf_length % num_parts
+
+    parts = []
+    start = 0
+    for i in range(num_parts):
+        end = start + pages_per_part + (1 if i < remainder else 0)
+        parts.append(list(range(start, end)))
+        start = end
+    return parts
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Split pdf page by page into seperate file (default), or split it in given number of parts.")
-    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .PDF file path')
-    parser.add_argument('-p', '--parts', type=parse_parts_argument, default=None, help='Number of parts that you want to split pdf.')
-    
+    parser = argparse.ArgumentParser(
+        description="Split a PDF into individual pages (default) or into a specified number of parts."
+    )
+    parser.add_argument("input_file", type=Path, help="Path to the input PDF file")
+    parser.add_argument(
+        "-p",
+        "--parts",
+        type=parse_parts_argument,
+        default=None,
+        help="Number of parts to split the PDF into",
+    )
+
     args = parser.parse_args()
+    input_file = args.input_file
 
-    if not os.path.isfile(args.input_file) or not args.input_file.lower().endswith('.pdf'):
-        print(f"Error: {args.input_file} does not exist or it is not PDF file.")
+    # Validate the input file
+    if not input_file.is_file() or input_file.suffix.lower() != ".pdf":
+        print(f"Error: '{input_file}' does not exist or is not a PDF file.")
         sys.exit(1)
-    
-    if args.parts:
-        reader = PdfReader(args.input_file)
-        pdf_length = len(reader.pages)
 
+    try:
+        reader = PdfReader(str(input_file))
+        pdf_length = len(reader.pages)
+    except PdfReadError as e:
+        print(f"Error reading PDF file '{input_file}': {e}")
+        sys.exit(1)
+
+    if args.parts:
         if args.parts > pdf_length:
-            print("Number of parts cannot exceed the number of pages. Splitting into individual pages.")
+            print(
+                "Number of parts cannot exceed the number of pages. Splitting into individual pages."
+            )
             parts = None
         else:
             parts = get_splitting_parts(pdf_length, args.parts)
     else:
         parts = None
 
-    split_pdf(args.input_file, parts)
+    split_pdf(input_file, parts)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

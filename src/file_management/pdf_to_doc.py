@@ -1,31 +1,46 @@
 from pdf2docx import parse
 import sys
 import argparse
-import os
+from pathlib import Path
 
-def pdf_to_docx(input_file, output_file):
-    if output_file is None or not output_file.lower().endswith('.docx'):
-        base, _ = os.path.splitext(input_file)
-        output_file = f"{base}.docx"
+
+def pdf_to_docx(input_file: Path, output_file: Path = None) -> None:
+    # Determine the output file path
+    if output_file is None or output_file.suffix.lower() != ".docx":
+        output_file = input_file.with_suffix(".docx")
+
     try:
-        parse(input_file, output_file)
-        print(f"Conversion succesful: {output_file}")
+        # Convert the PDF file to DOCX
+        parse(str(input_file), str(output_file))
+        print(f"Conversion successful: {output_file}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error converting {input_file} to DOCX: {e}")
         sys.exit(1)
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Covert PDF into DOCX.")
-    parser.add_argument('input_file', metavar='input_files', type=str, default=None, help='Input .PDF file paths')
-    parser.add_argument('-o', '--output_file', type=str, default=None, help='Output .DOCX file name')
-    
+    parser = argparse.ArgumentParser(description="Convert a PDF file to DOCX format.")
+    parser.add_argument("input_file", type=Path, help="Path to the input PDF file")
+    parser.add_argument(
+        "-o",
+        "--output_file",
+        type=Path,
+        default=None,
+        help="Path for the output DOCX file",
+    )
+
     args = parser.parse_args()
 
-    if os.path.isfile(args.input_file) and args.input_file.lower().endswith('.pdf'):
-        pdf_to_docx(args.input_file, args.output_file)
-    else:
-        print(f"Error: {args.input_file} does not exist.")
+    input_file = args.input_file
+    output_file = args.output_file
+
+    # Validate the input file
+    if not input_file.is_file() or input_file.suffix.lower() != ".pdf":
+        print(f"Error: {input_file} does not exist or is not a PDF file.")
         sys.exit(1)
 
-if __name__ == '__main__':
+    pdf_to_docx(input_file, output_file)
+
+
+if __name__ == "__main__":
     main()

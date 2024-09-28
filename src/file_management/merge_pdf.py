@@ -1,51 +1,85 @@
-import PyPDF2
 import sys
 import argparse
-import os
-import glob
+from datetime import datetime
+from pathlib import Path
+from PyPDF2 import PdfMerger
+from PyPDF2.errors import PdfReadError
 
-def merge_pdf(input_files, output_path):
-    pdf_merge = PyPDF2.PdfMerger()
-    for pdf in input_files:
+
+def merge_pdf(input_files: list[Path], output_file: Path = None) -> None:
+    if output_file is None or output_file.suffix.lower() != ".pdf":
+        print("No valid output path provided.")
+        print("Merged file will be saved in the directory of the first input file.")
+
+        first_input = Path(input_files[0])
+        current_date = datetime.now().strftime("%Y%m%d-%H%M")
+        output_filename = f"{current_date}_merged.pdf"
+
+        output_file = first_input.parent / output_filename
+        print(f"Merged file will be saved as: {output_file}")
+
+    merger = PdfMerger()
+    for pdf_file in input_files:
         try:
-            with open(pdf, 'rb') as pdf_file:
-                pdf_merge.append(PyPDF2.PdfReader(pdf_file))
-        except PyPDF2.errors.PdfReadError:
-            print(f"Error: {pdf} is not a valid PDF file or is corrupted. Skipping.")
+            merger.append(str(pdf_file))
+        except PdfReadError:
+            print(
+                f"Error: '{pdf_file}' is not a valid PDF file or is corrupted. Skipping."
+            )
         except Exception as e:
-            print(f"Unexpected error while reading {pdf}: {e}")
-    pdf_merge.write(output_path)
-    print(f"PDFs merged successfully into {output_path}")
+            print(f"Unexpected error while reading '{pdf_file}': {e}")
+    try:
+        merger.write(str(output_file))
+        print(f"PDFs merged successfully into '{output_file}'")
+    except Exception as e:
+        print(f"Error writing output PDF: {e}")
+        sys.exit(1)
+    finally:
+        merger.close()
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Merge multiple PDF files into a single PDF.")
-    parser.add_argument('-f', '--input_files', metavar='input_files', type=str, nargs='+', default=None, help='Input .pdf file paths')
-    parser.add_argument('-d', '--input_directory', type=str, default=None, help='Input directory with .pdf files inside')
-    parser.add_argument('-o', '--output_name', type=str, default="merged.pdf", help='Output PDF file path')
-    
+    parser = argparse.ArgumentParser(
+        description="Merge multiple PDF files into a single PDF."
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-f", "--input_files", type=Path, nargs="+", help="Input PDF file paths"
+    )
+    group.add_argument(
+        "-d",
+        "--input_directory",
+        type=Path,
+        help="Directory containing PDF files to merge",
+    )
+    parser.add_argument(
+        "-o", "--output", type=Path, default=None, help="Output PDF file path"
+    )
+
     args = parser.parse_args()
 
-    if args.input_files != None:
-        for path in args.input_files:
-            if not os.path.isfile(path):
-                print(f"Error: {path} does not exist.")
-                sys.exit(1)
-        base_path = os.path.dirname(args.input_files[0])
-        output_file = os.path.join(base_path, args.output_name)
-        merge_pdf(args.input_files, output_file)
-    elif args.input_directory != None:
-        input_files = []
-        for file_path in glob.glob(os.path.join(args.input_directory, '*')):
-            if os.path.isfile(file_path) and file_path.lower().endswith('.pdf'):
-                input_files.append(file_path)
-        if not input_files:
-            print(f"No .pdf files found in directory {args.input_directory}")
+    if args.input_files:
+        input_files = args.input_files
+    elif args.input_directory:
+        if not args.input_directory.is_dir():
+            print(f"Error: '{args.input_directory}' is not a valid directory.")
             sys.exit(1)
-        merge_pdf(input_files, os.path.join(args.input_directory, args.output_name))
+        input_files = sorted(args.input_directory.glob("*.pdf"))
+        if not input_files:
+            print(f"No PDF files found in directory '{args.input_directory}'")
+            sys.exit(1)
     else:
-        print("Error: Either --input_files or --input_directory must be provided.")
+        print("Error: Either input files or input directory must be provided.")
         sys.exit(1)
 
+    # Validate that input files exist and are files
+    for pdf_file in input_files:
+        if not pdf_file.is_file():
+            print(f"Error: '{pdf_file}' does not exist or is not a file.")
+            sys.exit(1)
 
-if __name__ == '__main__':
+    merge_pdf(input_files, args.output)
+
+
+if __name__ == "__main__":
     main()

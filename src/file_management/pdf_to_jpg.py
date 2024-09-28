@@ -1,45 +1,73 @@
-from pdf2image import convert_from_path
-from zipfile import ZipFile 
 import sys
 import argparse
-import os
+from pathlib import Path
+from pdf2image import convert_from_path
+from zipfile import ZipFile
+from io import BytesIO
 
-def pdf_to_jpg(input_file, zip=False):
-    base, _ = os.path.splitext(input_file)
+
+def pdf_to_jpg(input_file: Path, zip_output: bool = False) -> None:
+    base_name = input_file.stem
+    output_dir = input_file.parent
+
     try:
-        pages = convert_from_path(input_file)
-        if not zip:
-            write_pages_to_jpg(pages, base)
-            print("Successfully split the PDF into png files.")
+        # Convert PDF to a list of images
+        pages = convert_from_path(str(input_file))
+        print(f"Converted {len(pages)} pages from {input_file}.")
+
+        if zip_output:
+            zip_filename = output_dir / f"{base_name}_images.zip"
+            with ZipFile(zip_filename, "w") as zipf:
+                for i, page in enumerate(pages, start=1):
+                    # Save image to in-memory bytes buffer
+                    img_buffer = BytesIO()
+                    page.save(img_buffer, format="JPEG")
+                    img_buffer.seek(0)
+
+                    # Define the image file name inside the zip
+                    image_name = f"{base_name}_page_{i}.jpg"
+
+                    # Write the image buffer to the zip file
+                    zipf.writestr(image_name, img_buffer.read())
+                    print(f"Added {image_name} to {zip_filename}.")
+
+            print(f"Successfully zipped images into: {zip_filename}")
         else:
-            output_zip = f"{base}-png-packed.tar"
-            with ZipFile(output_zip, 'w') as zip_object:
-                write_pages_to_jpg(pages, base, zip_object)
-            print(f"Successfully split the PDF into png files and zipped into {output_zip}.")
+            for i, page in enumerate(pages, start=1):
+                output_file = output_dir / f"{base_name}_page_{i}.jpg"
+                page.save(output_file, "JPEG")
+                print(f"Successfully created: {output_file}")
+
+            print("Successfully converted PDF pages to JPG images.")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error processing {input_file}: {e}")
         sys.exit(1)
 
-def write_pages_to_jpg(pages, base, zip_object=False):
-     for i, page in enumerate(pages):
-        output_file = f"{base}-part_{i+1}.jpg"
-        page.save(output_file, "JPEG")
-        print(f"Succesfuly created: {output_file}.")
-        if zip_object:
-            zip_object.write(output_file, arcname=f"{base}-part_{i+1}.png")
 
 def main():
-    parser = argparse.ArgumentParser(description="Split pdf page by page into seperate png files (default), you can zip the output.")
-    parser.add_argument('input_file', metavar='input_file', type=str, default=None, help='Input .PDF file path')
-    parser.add_argument('-z', '--zip', action='store_true', help='Use if you want to zip the output.')
-    
+    parser = argparse.ArgumentParser(
+        description="Convert PDF pages to individual JPG images, with an option to zip the output."
+    )
+    parser.add_argument("input_file", type=Path, help="Path to the input PDF file")
+    parser.add_argument(
+        "-z",
+        "--zip",
+        action="store_true",
+        help="Zip the output JPG files into a single archive.",
+    )
+
     args = parser.parse_args()
 
-    if not os.path.isfile(args.input_file) or not args.input_file.lower().endswith('.pdf'):
-        print(f"Error: {args.input_file} does not exist or it is not PDF file.")
+    input_file = args.input_file
+    zip_output = args.zip
+
+    # Validate the input file
+    if not input_file.is_file() or input_file.suffix.lower() != ".pdf":
+        print(f"Error: '{input_file}' does not exist or is not a PDF file.")
         sys.exit(1)
 
-    pdf_to_jpg(args.input_file, args.zip)
+    pdf_to_jpg(input_file, zip_output)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

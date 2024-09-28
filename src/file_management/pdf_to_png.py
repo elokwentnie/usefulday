@@ -3,6 +3,7 @@ import argparse
 from pathlib import Path
 from pdf2image import convert_from_path
 from zipfile import ZipFile
+from io import BytesIO
 
 def pdf_to_png(input_file: Path, zip_output: bool = False) -> None:
     base_name = input_file.stem
@@ -11,21 +12,31 @@ def pdf_to_png(input_file: Path, zip_output: bool = False) -> None:
     try:
         # Convert PDF to a list of images
         pages = convert_from_path(str(input_file))
-
-        image_files = []
-        for i, page in enumerate(pages, start=1):
-            output_file = output_dir / f"{base_name}_page_{i}.png"
-            page.save(output_file, "PNG")
-            image_files.append(output_file)
-            print(f"Successfully created: {output_file}")
+        print(f"Converted {len(pages)} pages from {input_file}.")
 
         if zip_output:
             zip_filename = output_dir / f"{base_name}_images.zip"
             with ZipFile(zip_filename, 'w') as zipf:
-                for image_file in image_files:
-                    zipf.write(image_file, arcname=image_file.name)
+                for i, page in enumerate(pages, start=1):
+                    # Save image to in-memory bytes buffer
+                    img_buffer = BytesIO()
+                    page.save(img_buffer, format="PNG")
+                    img_buffer.seek(0)
+
+                    # Define the image file name inside the zip
+                    image_name = f"{base_name}_page_{i}.png"
+
+                    # Write the image buffer to the zip file
+                    zipf.writestr(image_name, img_buffer.read())
+                    print(f"Added {image_name} to {zip_filename}.")
+
             print(f"Successfully zipped images into: {zip_filename}")
         else:
+            for i, page in enumerate(pages, start=1):
+                output_file = output_dir / f"{base_name}_page_{i}.png"
+                page.save(output_file, "PNG")
+                print(f"Successfully created: {output_file}")
+
             print("Successfully converted PDF pages to PNG images.")
     except Exception as e:
         print(f"Error processing {input_file}: {e}")

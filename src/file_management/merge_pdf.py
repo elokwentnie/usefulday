@@ -1,10 +1,23 @@
 import sys
+import os
 import argparse
+from datetime import datetime
 from pathlib import Path
 from PyPDF2 import PdfMerger
 from PyPDF2.errors import PdfReadError
 
-def merge_pdf(input_files: list[Path], output_path: Path) -> None:
+def merge_pdf(input_files: list[Path], output_file: Path = None) -> None:
+    if output_file is None or output_file.suffix.lower() != '.pdf':
+        print("No valid output path provided.")
+        print("Merged file will be saved in the directory of the first input file.")
+
+        first_input = Path(input_files[0])
+        current_date = datetime.now().strftime("%Y%m%d-%H%M")
+        output_filename = f"{current_date}_merged.pdf"
+        
+        output_file = first_input.parent / output_filename
+        print(f"Merged file will be saved as: {output_file}")
+
     merger = PdfMerger()
     for pdf_file in input_files:
         try:
@@ -14,8 +27,8 @@ def merge_pdf(input_files: list[Path], output_path: Path) -> None:
         except Exception as e:
             print(f"Unexpected error while reading '{pdf_file}': {e}")
     try:
-        merger.write(str(output_path))
-        print(f"PDFs merged successfully into '{output_path}'")
+        merger.write(str(output_file))
+        print(f"PDFs merged successfully into '{output_file}'")
     except Exception as e:
         print(f"Error writing output PDF: {e}")
         sys.exit(1)
@@ -27,7 +40,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--input_files', type=Path, nargs='+', help='Input PDF file paths')
     group.add_argument('-d', '--input_directory', type=Path, help='Directory containing PDF files to merge')
-    parser.add_argument('-o', '--output', type=Path, default=Path('merged.pdf'), help='Output PDF file path')
+    parser.add_argument('-o', '--output', type=Path, default=None, help='Output PDF file path')
 
     args = parser.parse_args()
 

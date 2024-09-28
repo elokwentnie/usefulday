@@ -15,8 +15,7 @@ def validate_quality(value):
         raise argparse.ArgumentTypeError("Quality must be an integer between 1 and 100.")
 
 def heic_to_jpg(input_files, output_directory, quality=95):
-    output_directory = Path(output_directory)
-    output_directory.mkdir(parents=True, exist_ok=True)
+    output_directory = Path(input_files[0]).parent
 
     for file in input_files:
         try:
@@ -41,7 +40,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-f', '--input_files', type=Path, nargs='+', help='Input .HEIC file paths')
     group.add_argument('-d', '--input_directory', type=Path, help='Directory containing .HEIC files to convert')
-    parser.add_argument('-o', '--output', type=Path, default=Path.cwd(), help='Output directory (default: current directory)')
+    parser.add_argument('-o', '--output', type=Path, default=None, help='Output directory')
     parser.add_argument('-q', '--quality', type=validate_quality, default=95, help='Output image quality (1-100), default is 95')
 
     args = parser.parse_args()
@@ -54,7 +53,7 @@ def main():
         if not args.input_directory.is_dir():
             print(f"Error: '{args.input_directory}' is not a valid directory.")
             sys.exit(1)
-        input_files = list(args.input_directory.glob('*.heic'))
+        input_files = list(args.input_directory.glob('*.heic')) + list(args.input_directory.glob('*.HEIC'))
         if not input_files:
             print(f"No .HEIC files found in directory '{args.input_directory}'")
             sys.exit(1)

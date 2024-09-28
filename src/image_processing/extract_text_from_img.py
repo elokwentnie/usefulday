@@ -18,7 +18,7 @@ def extract_text_from_img(input_file: Path, save_flag: bool = False) -> None:
 
         # Save the extracted text to a file if requested
         if save_flag:
-            output_file = input_file.with_suffix('.txt')
+            output_file = input_file.with_name(f"{input_file.stem}_extracted-text.txt")
             with open(output_file, 'w', encoding='utf-8') as file:
                 file.write(extracted_text)
             print(f"Successfully saved extracted text to: {output_file}")

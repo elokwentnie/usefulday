@@ -10,7 +10,7 @@ def add_watermark(
     input_file: Path,
     watermark_pdf: Path,
     page_indices: Union[str, List[int]] = "ALL",
-) -> None:
+    ) -> None:
     try:
         reader = PdfReader(input_file)
         watermark_reader = PdfReader(watermark_pdf)
@@ -59,7 +59,7 @@ def main():
     parser.add_argument('input_file', type=Path, help='Input PDF file path')
     parser.add_argument('-w', '--watermark', type=Path, required=True, help='Watermark PDF file path')
     parser.add_argument(
-        '-p', '--pages', type=int, nargs='*', default="ALL",
+        '-p', '--pages', nargs='*', default="ALL",
         help='Page indices to apply the watermark (zero-based). Default is all pages.'
     )
     args = parser.parse_args()

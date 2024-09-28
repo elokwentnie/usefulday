@@ -13,7 +13,7 @@ def csv_to_json(input_file: Path, output_file: Path = None) -> None:
         # Strip whitespace from column names
         df.rename(columns=lambda x: x.strip(), inplace=True)
         # Write to JSON
-        df.to_json(output_file, indent=4, orient='records', lines=True)
+        df.to_json(output_file, indent=4, orient='records')
         print(f"Conversion successful: {output_file}")
     except pd.errors.ParserError as e:
         print(f"Error parsing CSV file {input_file}: {e}")
